@@ -730,8 +730,7 @@ function renderAdvisor() {
     item.innerHTML = `
       <div class="adv-check">${checked ? "✓" : ""}</div>
       <span>Absence produit ${p.label}</span>`;
-    item.onclick = (e) => {
-      e.stopPropagation();
+    item.onclick = () => {
       if (selectedIds.includes(p.id)) {
         const next = selectedIds.filter(id => id !== p.id);
         selectedIds = next.length > 0 ? next : ["epargne"];
@@ -741,20 +740,7 @@ function renderAdvisor() {
       const sel = getSelected();
       if (activeIndex >= sel.length) activeIndex = 0;
       renderAdvisor();
-      // Mise à jour silencieuse sans fermer le panneau ni reset du timer
-      const prod = sel[activeIndex] || sel[0];
-      document.getElementById("tagProduct").textContent     = prod.label;
-      document.getElementById("counterBadge").textContent  = `${activeIndex + 1}/${sel.length}`;
-      document.getElementById("mainTitle").textContent     = prod.title;
-      document.getElementById("mainSub").textContent       = prod.sub;
-      document.getElementById("solutionGlass").textContent = prod.solText;
-      document.getElementById("rpHeading").textContent     = prod.solTitle;
-      document.getElementById("mcLabel").textContent       = prod.mcLabel;
-      document.getElementById("mcValue").textContent       = prod.mcValue;
-      document.getElementById("mcCaption").textContent     = prod.mcCaption;
-      renderExtra(prod);
-      renderDots();
-      document.getElementById("imgEl").src = prod.img;
+      update(true);
     };
     container.appendChild(item);
   });
