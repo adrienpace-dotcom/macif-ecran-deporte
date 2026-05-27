@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MACIF — Écran déporté</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue-deep:   #071832;
+    --blue-dark:   #0B2454;
+    --blue-mid:    #1A3D7C;
+    --blue-light:  #E8EEF8;
+    --green:       #B8CC00;
+    --green-dark:  #8FA800;
+    --green-bg:    #F2F5D0;
+    --cream:       #F5F4EF;
+    --slate:       #94A3B8;
+    --white:       #FFFFFF;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #0A0F1A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ─── SHELL ─── */
+  .screen {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    background: var(--blue-deep);
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ─── IMAGE PANEL ─── */
+  .img-panel {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .img-bg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: opacity 0.7s ease;
+    transform-origin: center;
+    animation: kenburns 14s ease-in-out forwards;
+  }
+
+  @keyframes kenburns {
+    from { transform: scale(1.06); }
+    to   { transform: scale(1.01); }
+  }
+
+  .img-bg.fade-out { opacity: 0; }
+
+  .overlay-dir {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      118deg,
+      rgba(7,24,50,0.90) 0%,
+      rgba(7,24,50,0.55) 42%,
+      rgba(7,24,50,0.12) 75%,
+      transparent 100%
+    );
+  }
+
+  .overlay-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 70%;
+    background: linear-gradient(to top, rgba(5,14,34,0.97) 0%, rgba(5,14,34,0.60) 45%, transparent 100%);
+  }
+
+  .img-content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    padding: 42px 52px 48px;
+  }
+
+  /* Top row */
+  .top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tag-product {
+    background: rgba(255,255,255,0.94);
+    color: var(--blue-dark);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 50px;
+  }
+
+  .tag-live {
+    display: flex; align-items: center; gap: 9px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.16);
+    color: rgba(255,255,255,0.78);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 8px 18px;
+    border-radius: 50px;
+  }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: blink 2.4s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  /* Bottom content */
+  .bottom-block {
+    display: flex; flex-direction: column;
+    gap: 20px;
+  }
+
+  .scenario-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  .main-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 76px;
+    line-height: 0.93;
+    letter-spacing: -0.04em;
+    color: var(--white);
+    max-width: 620px;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .main-title.hidden { opacity: 0; transform: translateY(10px); }
+
+  .main-sub {
+    font-size: 19px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.70);
+    max-width: 440px;
+    transition: opacity 0.35s ease 0.05s;
+  }
+
+  .main-sub.hidden { opacity: 0; }
+
+  .solution-glass {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.13);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 18px;
+    padding: 18px 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.82);
+    max-width: 500px;
+    transition: opacity 0.35s ease 0.1s;
+  }
+
+  .solution-glass.hidden { opacity: 0; }
+
+  /* ─── RIGHT PANEL ─── */
+  .right-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background: var(--cream);
+    display: flex;
+    flex-direction: column;
+    padding: 36px 28px 28px;
+    border-left: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .rp-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin-bottom: 10px;
+  }
+
+  .rp-head-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .rp-heading {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1.1;
+    color: var(--blue-dark);
+    letter-spacing: -0.025em;
+    flex: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  .rp-heading.hidden { opacity: 0; }
+
+  .counter-badge {
+    background: var(--green-bg);
+    color: var(--green-dark);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 50px;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  /* Metric card */
+  .metric-card {
+    background: var(--blue-dark);
+    border-radius: 20px;
+    padding: 24px 24px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .mc-label {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 8px;
+  }
+
+  .mc-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.05em;
+    line-height: 1;
+  }
+
+  .mc-caption {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    margin-top: 5px;
+  }
+
+  .mc-extra { margin-top: 14px; }
+
+  /* Bars extra */
+  .bars-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 48px;
+  }
+
+  .bar {
+    flex: 1;
+    border-radius: 4px 4px 0 0;
+    background: rgba(255,255,255,0.13);
+    transition: height 0.4s ease;
+  }
+
+  .bar.accent { background: var(--green); }
+
+  /* Tags extra */
+  .tags-col {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
+  .tag-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.09);
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.70);
+  }
+
+  .tag-dot {
+    width: 5px; height: 5px;
+    background: var(--green);
+    border-radius: 50%;
+  }
+
+  /* Accent extra */
+  .accent-block {
+    display: flex; flex-direction: column; gap: 3px;
+  }
+
+  .accent-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: -0.03em;
+  }
+
+  .accent-cap {
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* Progress */
+  .progress-track {
+    height: 2px;
+    background: #DDE2E8;
+    border-radius: 1px;
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 1px;
+    width: 0%;
+    transition: width 0.12s linear;
+  }
+
+  /* Nav */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.12);
+    background: var(--white);
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--blue-dark);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+
+  .nav-btn:hover {
+    background: var(--blue-light);
+    border-color: var(--blue-mid);
+  }
+
+  .dots-row {
+    display: flex; gap: 6px; align-items: center;
+  }
+
+  .dot {
+    height: 7px;
+    border-radius: 4px;
+    background: #CBD5E1;
+    cursor: pointer;
+    transition: all 0.28s ease;
+  }
+
+  .dot.active {
+    background: var(--green);
+    width: 24px !important;
+  }
+
+  /* ─── ADVISOR ─── */
+  .adv-btn {
+    position: absolute;
+    top: 20px; right: 20px;
+    z-index: 80;
+    width: 40px; height: 40px;
+    background: var(--white);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--blue-dark);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.18);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .adv-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 28px rgba(0,0,0,0.22);
+  }
+
+  .adv-panel {
+    position: absolute;
+    top: 70px; right: 16px;
+    z-index: 80;
+    width: 258px;
+    background: var(--white);
+    border-radius: 22px;
+    box-shadow: 0 16px 56px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.04);
+    padding: 24px 20px;
+    display: flex; flex-direction: column; gap: 16px;
+    animation: panel-in 0.22s ease;
+  }
+
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .adv-panel-label {
+    font-size: 9px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  .adv-panel-title {
+    font-size: 15px; font-weight: 600;
+    color: var(--blue-dark);
+    margin-top: 3px;
+  }
+
+  .adv-panel-desc {
+    font-size: 11px; color: var(--slate);
+    line-height: 1.45; margin-top: 4px;
+  }
+
+  .adv-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 13px;
+    border-radius: 12px;
+    border: 1px solid #E8EEF8;
+    cursor: pointer;
+    font-size: 12px; color: var(--blue-dark);
+    transition: all 0.14s;
+    user-select: none;
+  }
+
+  .adv-item:hover { background: var(--blue-light); border-color: #C3CDE8; }
+
+  .adv-item.checked {
+    background: var(--green-bg);
+    border-color: #C7D400;
+    font-weight: 500;
+  }
+
+  .adv-check {
+    width: 16px; height: 16px;
+    border-radius: 5px;
+    border: 1.5px solid #CBD5E1;
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--white);
+    flex-shrink: 0;
+    transition: all 0.14s;
+  }
+
+  .adv-item.checked .adv-check {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  /* ─── KEYBOARD HINT ─── */
+  .key-hint {
+    position: absolute; bottom: 18px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 14px; align-items: center;
+    opacity: 0.28;
+    font-size: 10px; color: var(--white);
+    letter-spacing: 0.08em;
+    pointer-events: none;
+  }
+
+  .key {
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<div class="screen" id="screen">
+
+  <!-- IMAGE PANEL -->
+  <div class="img-panel">
+    <img class="img-bg" id="imgEl" src="" alt="" />
+    <div class="overlay-dir"></div>
+    <div class="overlay-bottom"></div>
+
+    <div class="img-content">
+      <div class="top-row">
+        <div class="tag-product" id="tagProduct">Épargne</div>
+        <div class="tag-live">
+          <div class="live-dot"></div>
+          <span>Essentiel pour moi</span>
+        </div>
+      </div>
+
+      <div class="bottom-block">
+        <div class="scenario-label">Mise en situation</div>
+        <div class="main-title" id="mainTitle">Votre voiture tombe en panne demain.</div>
+        <div class="main-sub" id="mainSub">Sans réserve disponible, une dépense imprévue peut vite déséquilibrer le budget.</div>
+        <div class="solution-glass" id="solutionGlass">50€ mis de côté chaque mois peuvent devenir un vrai capital dans le temps.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="rp-label">Solution proposée</div>
+    <div class="rp-head-row">
+      <div class="rp-heading" id="rpHeading">Construire une réserve progressivement</div>
+      <div class="counter-badge" id="counterBadge">1/3</div>
+    </div>
+
+    <div class="metric-card">
+      <div>
+        <div class="mc-label" id="mcLabel">Capital estimatif</div>
+        <div class="mc-value" id="mcValue">+20 552€</div>
+        <div class="mc-caption" id="mcCaption">projection sur 20 ans</div>
+      </div>
+      <div class="mc-extra" id="mcExtra"></div>
+    </div>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="prevBtn" aria-label="Précédent">←</button>
+      <div class="dots-row" id="dotsRow"></div>
+      <button class="nav-btn" id="nextBtn" aria-label="Suivant">→</button>
+    </div>
+  </div>
+
+  <!-- ADVISOR BUTTON -->
+  <button class="adv-btn" id="advBtn" aria-label="Espace conseiller">M</button>
+
+  <!-- ADVISOR PANEL (hidden by default) -->
+  <div class="adv-panel" id="advPanel" style="display:none;">
+    <div>
+      <div class="adv-panel-label">Espace conseiller</div>
+      <div class="adv-panel-title">Sujets à afficher</div>
+      <div class="adv-panel-desc">Cochez les manques produits détectés chez le sociétaire.</div>
+    </div>
+    <div id="advItems"></div>
+  </div>
+
+  <!-- KEYBOARD HINT -->
+  <div class="key-hint">
+    <span><span class="key">←</span> <span class="key">→</span> naviguer</span>
+    <span>défilement automatique 14 s</span>
+  </div>
+
+</div>
+
+<script>
+const PRODUCTS = [
+  {
+    id: "epargne",
+    label: "Épargne",
+    title: "Votre voiture tombe en panne demain.",
+    sub: "Sans réserve disponible, une dépense imprévue peut vite déséquilibrer le budget.",
+    solTitle: "Construire une réserve progressivement",
+    solText: "50€ mis de côté chaque mois peuvent devenir un vrai capital dans le temps.",
+    mcLabel: "Capital estimatif",
+    mcValue: "+20 552€",
+    mcCaption: "projection sur 20 ans",
+    extra: "bars",
+    img: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=1600&q=85",
+  },
+  {
+    id: "sante",
+    label: "Santé",
+    title: "1 200€ de frais dentaires.",
+    sub: "Un reste à charge important peut arriver au mauvais moment.",
+    solTitle: "Mieux absorber les frais de santé",
+    solText: "Une complémentaire adaptée peut couvrir l'essentiel des postes les plus coûteux.",
+    mcLabel: "Postes couverts",
+    mcValue: "3 postes",
+    mcCaption: "optique · dentaire · hospitalisation",
+    extra: "tags",
+    img: "https://images.unsplash.com/photo-1588776814546-daab30f310ce?auto=format&fit=crop&w=1600&q=85",
+  },
+  {
+    id: "prevoyance",
+    label: "Prévoyance",
+    title: "3 mois sans salaire complet.",
+    sub: "Un arrêt de travail peut fragiliser l'équilibre financier d'un foyer.",
+    solTitle: "Sécuriser les revenus du foyer",
+    solText: "Une solution de prévoyance aide à maintenir le niveau de vie, même à l'arrêt.",
+    mcLabel: "Objectif",
+    mcValue: "Revenus",
+    mcCaption: "maintien · stabilité · famille",
+    extra: "accent",
+    accentVal: "Protéger",
+    accentCap: "revenu garanti · famille sereine",
+    img: "https://images.unsplash.com/photo-1559526323-cb2f2fe2591b?auto=format&fit=crop&w=1600&q=85",
+  },
+  {
+    id: "retraite",
+    label: "Retraite",
+    title: "Et si vos revenus baissaient de 30% ?",
+    sub: "À la retraite, conserver son niveau de confort devient un sujet très concret.",
+    solTitle: "Anticiper étape par étape",
+    solText: "Commencer tôt, même modestement, change radicalement la projection à long terme.",
+    mcLabel: "Horizon",
+    mcValue: "Long terme",
+    mcCaption: "effort progressif · anticiper tôt",
+    extra: "accent",
+    accentVal: "Anticiper",
+    accentCap: "retraite sereine · niveau de vie",
+    img: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1600&q=85",
+  },
+  {
+    id: "obseques",
+    label: "Obsèques",
+    title: "Les proches doivent parfois tout gérer.",
+    sub: "Dans un moment difficile, les démarches et les frais peuvent peser lourd.",
+    solTitle: "Soulager ses proches à l'avance",
+    solText: "Organiser et financer ce moment en avance, c'est un acte de soin envers ceux qu'on aime.",
+    mcLabel: "Anticipation",
+    mcValue: "Sérénité",
+    mcCaption: "organisation · financement anticipé",
+    extra: "accent",
+    accentVal: "Prévoir",
+    accentCap: "famille protégée · démarches allégées",
+    img: "https://images.unsplash.com/photo-1543489822-c49534f3271f?auto=format&fit=crop&w=1600&q=85",
+  },
+  {
+    id: "credit",
+    label: "Crédit projet",
+    title: "Un projet ne peut pas toujours attendre.",
+    sub: "Travaux, véhicule, équipement : certains besoins demandent un financement structuré.",
+    solTitle: "Financer sans déséquilibrer",
+    solText: "Un financement bien dimensionné permet de concrétiser sans fragiliser le budget global.",
+    mcLabel: "Exemple",
+    mcValue: "25 000€",
+    mcCaption: "véhicule · travaux · équipement",
+    extra: "bars",
+    img: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=1600&q=85",
+  },
+];
+
+const DURATION = 14000;
+
+let selectedIds = ["epargne", "sante", "credit"];
+let activeIndex  = 0;
+let panelOpen    = false;
+let rafId        = null;
+let startTime    = null;
+
+// ── helpers ──
+function getSelected() { return PRODUCTS.filter(p => selectedIds.includes(p.id)); }
+
+function renderExtra(p) {
+  const el = document.getElementById("mcExtra");
+  if (!el) return;
+
+  if (p.extra === "bars") {
+    el.innerHTML = `
+      <div class="bars-row">
+        <div class="bar" style="height:28%"></div>
+        <div class="bar" style="height:48%"></div>
+        <div class="bar" style="height:72%"></div>
+        <div class="bar accent" style="height:100%"></div>
+      </div>`;
+  } else if (p.extra === "tags") {
+    el.innerHTML = `
+      <div class="tags-col">
+        <div class="tag-item"><span>Optique</span><div class="tag-dot"></div></div>
+        <div class="tag-item"><span>Dentaire</span><div class="tag-dot"></div></div>
+        <div class="tag-item"><span>Hospitalisation</span><div class="tag-dot"></div></div>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="accent-block">
+        <div class="accent-val">${p.accentVal || "—"}</div>
+        <div class="accent-cap">${p.accentCap || ""}</div>
+      </div>`;
+  }
+}
+
+function renderDots() {
+  const sel = getSelected();
+  const row = document.getElementById("dotsRow");
+  row.innerHTML = "";
+  sel.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot" + (i === activeIndex ? " active" : "");
+    d.style.width = i === activeIndex ? "24px" : "7px";
+    d.onclick = () => goTo(i);
+    row.appendChild(d);
+  });
+}
+
+function renderAdvisor() {
+  const container = document.getElementById("advItems");
+  container.innerHTML = "";
+  PRODUCTS.forEach(p => {
+    const checked = selectedIds.includes(p.id);
+    const item = document.createElement("div");
+    item.className = "adv-item" + (checked ? " checked" : "");
+    item.innerHTML = `
+      <div class="adv-check">${checked ? "✓" : ""}</div>
+      <span>Absence produit ${p.label}</span>`;
+    item.onclick = (e) => {
+      e.stopPropagation();
+      if (selectedIds.includes(p.id)) {
+        const next = selectedIds.filter(id => id !== p.id);
+        selectedIds = next.length > 0 ? next : ["epargne"];
+      } else {
+        selectedIds = [...selectedIds, p.id];
+      }
+      const sel = getSelected();
+      if (activeIndex >= sel.length) activeIndex = 0;
+      renderAdvisor();
+      // Mise à jour silencieuse sans fermer le panneau ni reset du timer
+      const prod = sel[activeIndex] || sel[0];
+      document.getElementById("tagProduct").textContent     = prod.label;
+      document.getElementById("counterBadge").textContent  = `${activeIndex + 1}/${sel.length}`;
+      document.getElementById("mainTitle").textContent     = prod.title;
+      document.getElementById("mainSub").textContent       = prod.sub;
+      document.getElementById("solutionGlass").textContent = prod.solText;
+      document.getElementById("rpHeading").textContent     = prod.solTitle;
+      document.getElementById("mcLabel").textContent       = prod.mcLabel;
+      document.getElementById("mcValue").textContent       = prod.mcValue;
+      document.getElementById("mcCaption").textContent     = prod.mcCaption;
+      renderExtra(prod);
+      renderDots();
+      document.getElementById("imgEl").src = prod.img;
+    };
+    container.appendChild(item);
+  });
+}
+
+// ── progress RAF ──
+function startProgress() {
+  if (rafId) cancelAnimationFrame(rafId);
+  const fill = document.getElementById("progressFill");
+  fill.style.transition = "none";
+  fill.style.width = "0%";
+  startTime = performance.now();
+
+  function tick(now) {
+    const elapsed = now - startTime;
+    const pct = Math.min((elapsed / DURATION) * 100, 100);
+    fill.style.width = pct + "%";
+    if (elapsed < DURATION) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      const sel = getSelected();
+      activeIndex = (activeIndex + 1) % sel.length;
+      update(false);
+    }
+  }
+  rafId = requestAnimationFrame(tick);
+}
+
+// ── main update ──
+function update(resetTimer) {
+  const sel   = getSelected();
+  const p     = sel[activeIndex] || sel[0];
+  const imgEl = document.getElementById("imgEl");
+
+  // Fade out text
+  ["mainTitle","mainSub","solutionGlass","rpHeading"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("hidden");
+  });
+
+  // Swap image
+  imgEl.classList.add("fade-out");
+  setTimeout(() => {
+    imgEl.src = p.img;
+    imgEl.alt = p.label;
+    imgEl.style.animation = "none";
+    void imgEl.offsetWidth; // reflow
+    imgEl.style.animation  = "";
+    imgEl.classList.remove("fade-out");
+  }, 300);
+
+  // Update text after brief delay
+  setTimeout(() => {
+    document.getElementById("tagProduct").textContent   = p.label;
+    document.getElementById("counterBadge").textContent = `${activeIndex + 1}/${sel.length}`;
+    document.getElementById("mainTitle").textContent    = p.title;
+    document.getElementById("mainSub").textContent      = p.sub;
+    document.getElementById("solutionGlass").textContent = p.solText;
+    document.getElementById("rpHeading").textContent    = p.solTitle;
+    document.getElementById("mcLabel").textContent      = p.mcLabel;
+    document.getElementById("mcValue").textContent      = p.mcValue;
+    document.getElementById("mcCaption").textContent    = p.mcCaption;
+    renderExtra(p);
+    renderDots();
+    ["mainTitle","mainSub","solutionGlass","rpHeading"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove("hidden");
+    });
+  }, 280);
+
+  startProgress();
+}
+
+function goTo(i) {
+  const sel = getSelected();
+  activeIndex = ((i % sel.length) + sel.length) % sel.length;
+  update(true);
+}
+
+// ── events ──
+document.getElementById("prevBtn").onclick = () => goTo(activeIndex - 1);
+document.getElementById("nextBtn").onclick = () => goTo(activeIndex + 1);
+
+document.getElementById("advBtn").onclick = (e) => {
+  e.stopPropagation();
+  panelOpen = !panelOpen;
+  document.getElementById("advPanel").style.display = panelOpen ? "flex" : "none";
+};
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#advPanel") && !e.target.closest("#advBtn")) {
+    panelOpen = false;
+    document.getElementById("advPanel").style.display = "none";
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") goTo(activeIndex + 1);
+  if (e.key === "ArrowLeft")  goTo(activeIndex - 1);
+  if (e.key === "m" || e.key === "M") {
+    panelOpen = !panelOpen;
+    document.getElementById("advPanel").style.display = panelOpen ? "flex" : "none";
+  }
+});
+
+// ── init ──
+renderAdvisor();
+update(false);
+</script>
+</body>
+</html>
